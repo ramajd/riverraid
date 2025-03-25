@@ -1,5 +1,10 @@
-use crossterm::{ExecutableCommand, cursor, terminal};
-use std::io::{Stdout, stdout};
+use crossterm::{
+    ExecutableCommand, QueueableCommand,
+    cursor::{self, MoveTo},
+    style::{Print, ResetColor, SetBackgroundColor, SetForegroundColor},
+    terminal::{self, Clear},
+};
+use std::io::{Stdout, Write, stdout};
 
 #[derive(Debug)]
 pub struct Screen {
@@ -24,8 +29,34 @@ impl Screen {
     }
 
     pub fn restore(&mut self) -> std::io::Result<()> {
-        self.screen.execute(cursor::Show)?;
+        self.screen.execute(cursor::Show)?.execute(ResetColor)?;
         terminal::disable_raw_mode()?;
+        Ok(())
+    }
+
+    pub fn clear(&mut self) -> std::io::Result<()> {
+        self.screen.execute(Clear(terminal::ClearType::All))?;
+        Ok(())
+    }
+
+    pub(crate) fn draw(
+        &mut self,
+        location: (u16, u16),
+        data: String,
+        foreground: crossterm::style::Color,
+        background: crossterm::style::Color,
+    ) -> std::io::Result<()> {
+        let (col, row) = location;
+        self.screen
+            .queue(MoveTo(col, row))?
+            .queue(SetForegroundColor(foreground))?
+            .queue(SetBackgroundColor(background))?
+            .queue(Print(data))?;
+        Ok(())
+    }
+
+    pub(crate) fn flush(&mut self) -> std::io::Result<()> {
+        self.screen.flush()?;
         Ok(())
     }
 }
