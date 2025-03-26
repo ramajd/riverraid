@@ -1,7 +1,7 @@
 use crossterm::{
     ExecutableCommand, QueueableCommand,
     cursor::{self, MoveTo},
-    style::{Print, ResetColor, SetBackgroundColor, SetForegroundColor},
+    style::{Attribute, Print, ResetColor, SetAttribute, SetBackgroundColor, SetForegroundColor},
     terminal::{self, Clear},
 };
 use std::io::{Stdout, Write, stdout};
@@ -27,6 +27,7 @@ impl Screen {
         terminal::enable_raw_mode()?;
         self.screen
             .execute(terminal::Clear(terminal::ClearType::All))?
+            .execute(SetAttribute(Attribute::Bold))?
             .execute(cursor::Hide)?;
         Ok(())
     }

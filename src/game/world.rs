@@ -11,7 +11,7 @@ impl World {
     pub fn new(dimensions: (u16, u16)) -> std::io::Result<Self> {
         let center = dimensions.0 / 2;
         Ok(World {
-            walls: vec![(center - 10, center + 10); dimensions.1 as usize],
+            walls: vec![(center - 15, center + 15); dimensions.1 as usize],
         })
     }
 

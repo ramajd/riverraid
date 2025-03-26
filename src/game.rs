@@ -4,11 +4,13 @@ use crossterm::{
     event::{Event, KeyCode, poll, read},
     style::Color,
 };
+use fuel::Fuel;
 use player::Player;
 use world::World;
 
 use crate::screen::{Location, Screen};
 
+mod fuel;
 mod player;
 mod world;
 
@@ -33,6 +35,7 @@ pub struct Game<'a> {
     status: GameStatus,
     world: World,
     player: Player,
+    fuels: Vec<Fuel>,
 }
 
 impl<'a> Game<'a> {
@@ -48,6 +51,10 @@ impl<'a> Game<'a> {
                 dimensions.1 - 1,
                 Location(dimensions.0, dimensions.1),
             ),
+            fuels: vec![
+                Fuel::new(dimensions.0 / 2 + 5, 5),
+                Fuel::new(dimensions.0 / 2 - 10, 10),
+            ],
         })
     }
 
@@ -108,13 +115,15 @@ impl<'a> Game<'a> {
         self.screen.clear(false)?;
 
         self.world.draw(self.screen)?;
-        // self.screen.draw(
-        //     Location(0, 0),
-        //     format!("{:?}", &self),
-        //     Color::White,
-        //     Color::Black,
-        // )?;
+
+        // self.screen.draw(Location(0, 0), format!("{:?}", &self), Color::White, Color::Black)?;
+
+        for fuel in &self.fuels {
+            fuel.draw(self.screen)?;
+        }
+
         self.player.draw(self.screen)?;
+
         self.screen.flush()?;
         Ok(())
     }
