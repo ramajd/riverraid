@@ -5,15 +5,15 @@ mod game;
 mod screen;
 
 fn main() -> std::io::Result<()> {
-    let mut sc = Screen::new()?;
-    sc.init()?;
+    let mut screen = Screen::new()?;
+    screen.init()?;
 
-    let mut game = Game::new(&mut sc, Difficulty::Easy)?;
+    let mut game = Game::new(&mut screen, Difficulty::Easy)?;
 
     game.initiate()?;
     game.main_loop()?;
     game.terminate()?;
 
-    sc.restore()?;
+    screen.restore()?;
     Ok(())
 }

@@ -6,6 +6,9 @@ use crossterm::{
 };
 use std::io::{Stdout, Write, stdout};
 
+#[derive(Debug, Clone, Copy)]
+pub struct Location(pub u16, pub u16);
+
 #[derive(Debug)]
 pub struct Screen {
     screen: Stdout,
@@ -29,24 +32,27 @@ impl Screen {
     }
 
     pub fn restore(&mut self) -> std::io::Result<()> {
-        self.screen.execute(cursor::Show)?.execute(ResetColor)?;
         terminal::disable_raw_mode()?;
+        self.screen.execute(cursor::Show)?.execute(ResetColor)?;
         Ok(())
     }
 
-    pub fn clear(&mut self) -> std::io::Result<()> {
-        self.screen.execute(Clear(terminal::ClearType::All))?;
+    pub fn clear(&mut self, immediate: bool) -> std::io::Result<()> {
+        self.screen.queue(Clear(terminal::ClearType::All))?;
+        if immediate {
+            self.screen.flush()?;
+        }
         Ok(())
     }
 
     pub(crate) fn draw(
         &mut self,
-        location: (u16, u16),
+        location: Location,
         data: String,
         foreground: crossterm::style::Color,
         background: crossterm::style::Color,
     ) -> std::io::Result<()> {
-        let (col, row) = location;
+        let Location(col, row) = location;
         self.screen
             .queue(MoveTo(col, row))?
             .queue(SetForegroundColor(foreground))?
